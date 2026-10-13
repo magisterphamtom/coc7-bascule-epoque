@@ -1,0 +1,129 @@
+/* CoC7 – Bascule d'époque — magisterphamtom */
+
+/* ---- Fenêtre de bascule ---- */
+#coc7-bascule-epoque-app .window-content { padding: 0; }
+.cbe-app {
+  padding: 14px 16px 16px;
+  background: linear-gradient(165deg, #14110d 0%, #1e1911 100%);
+  color: #ede3cb;
+}
+.cbe-intro { margin: 0 0 12px; font-size: 13px; color: #b9a984; text-align: center; }
+.cbe-eras { display: flex; gap: 12px; }
+.cbe-era {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  height: auto;
+  min-height: 190px;
+  padding: 14px 12px 12px;
+  text-align: center;
+  line-height: 1.2;
+  cursor: pointer;
+  color: #ede3cb;
+  border-radius: 4px;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+.cbe-era:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45); }
+.cbe-era:disabled { opacity: 0.6; cursor: wait; }
+.cbe-era.cbe-1933 {
+  background:
+    repeating-linear-gradient(45deg, rgba(201, 162, 74, 0.05) 0 2px, transparent 2px 12px),
+    linear-gradient(180deg, #2a2114, #15110c);
+}
+.cbe-era.cbe-modern {
+  background:
+    linear-gradient(rgba(120, 170, 210, 0.08) 1px, transparent 1px) 0 0 / 12px 12px,
+    linear-gradient(90deg, rgba(120, 170, 210, 0.08) 1px, transparent 1px) 0 0 / 12px 12px,
+    linear-gradient(180deg, #16263a, #0c1520);
+  border-color: rgba(79, 182, 172, 0.45);
+}
+.cbe-era.current { border-width: 2px; border-color: #ecd27a; box-shadow: 0 0 0 1px rgba(236, 210, 122, 0.35) inset; }
+.cbe-era.cbe-modern.current { border-color: #8fe0d6; }
+.cbe-era-label {
+  font-family: "C7CC Limelight", "C7FT Limelight", "TAH20 Limelight", "Limelight", Georgia, serif;
+  font-size: 30px;
+  letter-spacing: 0.04em;
+  color: #ecd27a;
+}
+.cbe-era.cbe-modern .cbe-era-label { font-family: "C7CC Rajdhani", "M26 Rajdhani", "C7FT Rajdhani", "TAH20 Rajdhani", "Rajdhani", sans-serif; font-weight: 700; color: #8fe0d6; }
+.cbe-era-sub { font-size: 12px; color: #b9a984; font-style: italic; }
+.cbe-era-badge {
+  align-self: center;
+  margin: 4px 0 2px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #14110d;
+  background: #ecd27a;
+  border-radius: 2px;
+}
+.cbe-era.cbe-modern .cbe-era-badge { background: #8fe0d6; }
+.cbe-era-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid rgba(201, 162, 39, 0.25);
+  text-align: left;
+  font-size: 11.5px;
+  color: #d8ccae;
+}
+.cbe-era-list li { margin: 3px 0; }
+.cbe-era-list i { width: 16px; text-align: center; color: #c9a227; margin-right: 4px; }
+.cbe-era.cbe-modern .cbe-era-list i { color: #4fb6ac; }
+.cbe-hint { margin: 12px 0 10px; font-size: 11.5px; color: #9c8f72; }
+.cbe-config {
+  width: 100%;
+  color: #ede3cb;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
+/* ---- Réglages ---- */
+.cbe-config-form { padding: 4px; }
+.cbe-fieldset { margin: 0 0 10px; border-radius: 4px; }
+.cbe-fieldset.cbe-1933 { border-color: #c9a227; }
+.cbe-fieldset.cbe-modern { border-color: #4fb6ac; }
+.cbe-fieldset legend { font-weight: 700; letter-spacing: 0.06em; padding: 0 6px; }
+
+/* ---- Étiquette d'époque sur les dossiers (MJ) ---- */
+.cbe-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  vertical-align: middle;
+  color: #14110d;
+}
+.cbe-tag-1933 { background: #ecd27a; }
+.cbe-tag-modern { background: #8fe0d6; }
+
+/* ---- Annonce dans le chat ---- */
+.chat-message .cbe-announce {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px 10px;
+  text-align: center;
+  border-radius: 4px;
+  color: #ede3cb;
+  background: linear-gradient(180deg, #2a2114, #15110c);
+  border: 1px solid #c9a227;
+}
+.chat-message .cbe-announce.cbe-modern {
+  background: linear-gradient(180deg, #16263a, #0c1520);
+  border-color: #4fb6ac;
+}
+.chat-message .cbe-announce-kicker { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #b9a984; }
+.chat-message .cbe-announce-era { font-family: "C7CC Limelight", "C7FT Limelight", "TAH20 Limelight", "Limelight", Georgia, serif; font-size: 30px; color: #ecd27a; line-height: 1.1; }
+.chat-message .cbe-announce.cbe-modern .cbe-announce-era { font-family: "M26 Rajdhani", "C7FT Rajdhani", "TAH20 Rajdhani", "Rajdhani", sans-serif; font-weight: 700; color: #8fe0d6; }
+.chat-message .cbe-announce-sub { font-size: 12px; font-style: italic; color: #d8ccae; }

@@ -1,0 +1,24 @@
+<section class="cbe-app">
+  <p class="cbe-intro">Choisis l'époque où se déroule la suite de la partie.</p>
+  <div class="cbe-eras">
+    {{#each eras as |e|}}
+      <button type="button" class="cbe-era cbe-{{e.key}}{{#if e.current}} current{{/if}}" data-action="switch" data-era="{{e.key}}">
+        <span class="cbe-era-label">{{e.label}}</span>
+        {{#if e.sub}}<span class="cbe-era-sub">{{e.sub}}</span>{{/if}}
+        {{#if e.current}}<span class="cbe-era-badge">Époque actuelle</span>{{/if}}
+        <ul class="cbe-era-list">
+          <li><i class="fa-solid fa-list-check"></i> Suivis Chance, SAN, Bonds</li>
+          {{#if e.chatTheme}}<li><i class="fa-solid fa-palette"></i> Chat : {{e.chatTheme}}</li>{{/if}}
+          {{#if e.scene}}<li><i class="fa-solid fa-map"></i> Scène : {{e.scene}}</li>{{/if}}
+          {{#if e.playlist}}<li><i class="fa-solid fa-music"></i> Musique : {{e.playlist}}</li>{{/if}}
+          {{#if e.folders}}<li><i class="fa-solid fa-folder"></i> {{e.folders}} dossier(s) de cette époque</li>{{/if}}
+        </ul>
+      </button>
+    {{/each}}
+  </div>
+  <p class="cbe-hint">
+    Rattache des dossiers à une époque par <b>clic droit → Époque : …</b> dans la barre latérale :
+    ceux de l'autre époque seront masqués{{#unless hasDossiers}} (nécessite le module « Masquer les dossiers de journaux »){{/unless}}.
+  </p>
+  <button type="button" class="cbe-config" data-action="configure"><i class="fa-solid fa-gears"></i> Réglages des époques…</button>
+</section>

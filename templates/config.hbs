@@ -1,0 +1,27 @@
+<div class="cbe-config-form">
+  {{#each eras as |e|}}
+    <fieldset class="cbe-fieldset cbe-{{e.key}}">
+      <legend>{{e.title}}</legend>
+      <div class="form-group"><label>Nom affiché</label><div class="form-fields"><input type="text" name="{{e.key}}.label" value="{{e.label}}"></div></div>
+      <div class="form-group"><label>Sous-titre</label><div class="form-fields"><input type="text" name="{{e.key}}.sub" value="{{e.sub}}"></div></div>
+      <div class="form-group"><label>Scène à activer</label><div class="form-fields"><select name="{{e.key}}.scene">
+        {{#each e.scenes as |o|}}<option value="{{o.id}}" {{#if o.selected}}selected{{/if}}>{{o.name}}</option>{{/each}}
+      </select></div></div>
+      <div class="form-group"><label>Playlist à lancer</label><div class="form-fields"><select name="{{e.key}}.playlist">
+        {{#each e.playlists as |o|}}<option value="{{o.id}}" {{#if o.selected}}selected{{/if}}>{{o.name}}</option>{{/each}}
+      </select></div></div>
+      {{#if ../chatActive}}
+      <div class="form-group"><label>Thème du chat</label><div class="form-fields"><select name="{{e.key}}.chatTheme">
+        {{#each e.themes as |o|}}<option value="{{o.id}}" {{#if o.selected}}selected{{/if}}>{{o.name}}</option>{{/each}}
+      </select></div>
+      <p class="hint">Imposé à toute la table. Le HUD de combat, Token Action HUD et les fiches réglées « comme le chat » suivent.</p></div>
+      {{/if}}
+      <div class="form-group"><label>Annonce dans le chat</label><div class="form-fields"><input type="checkbox" name="{{e.key}}.announce" {{#if e.announce}}checked{{/if}}></div></div>
+      <div class="form-group"><label>Bandeau animé à l'écran</label><div class="form-fields">
+        <input type="checkbox" name="{{e.key}}.banner" {{#if e.banner}}checked{{/if}}>
+        <button type="button" class="cbe-preview" data-action="preview" data-era="{{e.key}}"><i class="fa-solid fa-eye"></i> Aperçu</button>
+      </div></div>
+    </fieldset>
+  {{/each}}
+  <footer class="form-footer"><button type="submit"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button></footer>
+</div>

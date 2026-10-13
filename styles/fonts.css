@@ -1,0 +1,4 @@
+/* Polices du bandeau — SIL Open Font License 1.1 (voir fonts/) */
+@font-face { font-family: "CBE Limelight"; src: url("../fonts/Limelight.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "CBE Rajdhani"; src: url("../fonts/Rajdhani-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: block; }
+@font-face { font-family: "CBE Rajdhani"; src: url("../fonts/Rajdhani-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }

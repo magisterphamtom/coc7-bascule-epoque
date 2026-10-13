@@ -1,0 +1,290 @@
+/* CoC7 – Bascule d'époque · bandeau animé (≈ 4,2 s) — magisterphamtom
+   1933       : Art Déco noir et or, soleil rayonnant, éclat sépia
+   2025-2026  : écran de station polaire, quadrillage, balayage, léger « glitch » */
+
+.cbe-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ---------- Voile et éclair ---------- */
+.cbe-b-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.78) 75%);
+  animation: cbe-veil 4.2s ease forwards;
+}
+.cbe-b-flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: cbe-flash 0.9s ease-out forwards;
+}
+.cbe-banner-1933 .cbe-b-flash { background: radial-gradient(ellipse at center, #fff4d6 0%, #c9a24a 45%, transparent 75%); }
+.cbe-banner-modern .cbe-b-flash { background: radial-gradient(ellipse at center, #e8fbff 0%, #6fd0ff 40%, transparent 75%); }
+
+/* ---------- Bandeau ---------- */
+.cbe-b-band {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transform-origin: center;
+  transform: scaleY(0);
+  animation: cbe-band 4.2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+}
+.cbe-banner-1933 .cbe-b-band {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.55)),
+    repeating-linear-gradient(90deg, rgba(201, 162, 74, 0.05) 0 1px, transparent 1px 26px),
+    linear-gradient(180deg, #1e170e 0%, #0d0a06 50%, #1e170e 100%);
+  box-shadow: 0 0 80px rgba(201, 162, 74, 0.25), 0 0 0 1px #7d6128;
+}
+.cbe-banner-modern .cbe-b-band {
+  background:
+    linear-gradient(180deg, rgba(4, 12, 20, 0.6), transparent 25%, transparent 75%, rgba(4, 12, 20, 0.6)),
+    linear-gradient(rgba(120, 200, 255, 0.10) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(90deg, rgba(120, 200, 255, 0.10) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(180deg, #0f2236 0%, #07121d 50%, #0f2236 100%);
+  box-shadow: 0 0 80px rgba(80, 190, 255, 0.25), 0 0 0 1px #2c5876;
+}
+
+/* Décor de fond */
+.cbe-b-deco {
+  position: absolute;
+  inset: -60%;
+  opacity: 0;
+  animation: cbe-deco-in 4.2s ease forwards;
+}
+.cbe-banner-1933 .cbe-b-deco {
+  /* soleil Art Déco */
+  background: repeating-conic-gradient(from 0deg at 50% 50%,
+    rgba(201, 162, 74, 0.22) 0deg 3deg, transparent 3deg 9deg);
+  -webkit-mask-image: radial-gradient(circle at center, #000 0%, #000 12%, transparent 46%);
+  mask-image: radial-gradient(circle at center, #000 0%, #000 12%, transparent 46%);
+  animation: cbe-deco-in 4.2s ease forwards, cbe-spin 24s linear infinite;
+}
+.cbe-banner-modern .cbe-b-deco {
+  /* lignes de balayage + barre lumineuse qui traverse */
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(140, 230, 255, 0.0) 40%, rgba(140, 230, 255, 0.35) 50%, rgba(140, 230, 255, 0) 60%, transparent 100%) no-repeat,
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px);
+  background-size: 40% 100%, 100% 100%;
+  background-position: -60% 0, 0 0;
+  animation: cbe-deco-in 4.2s ease forwards, cbe-sweep 1.6s 0.5s ease-in-out 2;
+}
+
+/* Filets horizontaux qui s'ouvrent depuis le centre */
+.cbe-b-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transform: scaleX(0);
+  animation: cbe-line 4.2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+}
+.cbe-b-line-top { top: 18px; }
+.cbe-b-line-bottom { bottom: 18px; }
+.cbe-banner-1933 .cbe-b-line {
+  height: 5px;
+  background:
+    linear-gradient(90deg, transparent, #c9a24a 15%, #ecd08a 50%, #c9a24a 85%, transparent) top / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, #c9a24a 15%, #ecd08a 50%, #c9a24a 85%, transparent) bottom / 100% 2px no-repeat;
+}
+.cbe-banner-modern .cbe-b-line {
+  background: linear-gradient(90deg, transparent, #4aa8e0 12%, #8fe0ff 50%, #4aa8e0 88%, transparent);
+  box-shadow: 0 0 12px rgba(120, 220, 255, 0.7);
+}
+.cbe-banner-modern .cbe-b-line-bottom {
+  background: linear-gradient(90deg, transparent, #ff6a13 40%, #ffb27a 50%, #ff6a13 60%, transparent);
+  box-shadow: 0 0 12px rgba(255, 106, 19, 0.6);
+}
+
+/* Coins */
+.cbe-b-corner {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  opacity: 0;
+  animation: cbe-fade-mid 4.2s ease forwards;
+}
+.cbe-b-tl { top: 34px; left: 12%; }
+.cbe-b-tr { top: 34px; right: 12%; }
+.cbe-b-bl { bottom: 34px; left: 12%; }
+.cbe-b-br { bottom: 34px; right: 12%; }
+.cbe-banner-1933 .cbe-b-corner { border-color: #c9a24a; border-style: solid; border-width: 0; }
+.cbe-banner-1933 .cbe-b-corner::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #c9a24a;
+  transform: rotate(45deg);
+}
+.cbe-banner-1933 .cbe-b-tl { border-top-width: 2px; border-left-width: 2px; }
+.cbe-banner-1933 .cbe-b-tr { border-top-width: 2px; border-right-width: 2px; }
+.cbe-banner-1933 .cbe-b-bl { border-bottom-width: 2px; border-left-width: 2px; }
+.cbe-banner-1933 .cbe-b-br { border-bottom-width: 2px; border-right-width: 2px; }
+.cbe-banner-1933 .cbe-b-tl::after { top: 6px; left: 6px; }
+.cbe-banner-1933 .cbe-b-tr::after { top: 6px; right: 6px; }
+.cbe-banner-1933 .cbe-b-bl::after { bottom: 6px; left: 6px; }
+.cbe-banner-1933 .cbe-b-br::after { bottom: 6px; right: 6px; }
+.cbe-banner-modern .cbe-b-corner { border: 0 solid #8fe0ff; }
+.cbe-banner-modern .cbe-b-tl { border-top-width: 3px; border-left-width: 3px; }
+.cbe-banner-modern .cbe-b-tr { border-top-width: 3px; border-right-width: 3px; }
+.cbe-banner-modern .cbe-b-bl { border-bottom-width: 3px; border-left-width: 3px; }
+.cbe-banner-modern .cbe-b-br { border-bottom-width: 3px; border-right-width: 3px; }
+
+/* ---------- Texte ---------- */
+.cbe-b-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 1;
+}
+.cbe-b-kicker {
+  font-size: 15px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: cbe-rise 4.2s ease forwards;
+  animation-delay: 0s;
+}
+.cbe-b-era {
+  margin: 14px 0 12px;
+  font-size: 128px;
+  white-space: nowrap;
+  opacity: 0;
+  animation: cbe-era-in 4.2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+}
+.cbe-b-sub {
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  animation: cbe-rise-late 4.2s ease forwards;
+}
+
+.cbe-banner-1933 .cbe-b-kicker { font-family: "CBE Limelight", Georgia, serif; color: #c9a24a; }
+.cbe-banner-1933 .cbe-b-era {
+  font-family: "CBE Limelight", Georgia, serif;
+  background: linear-gradient(100deg, #8a6a24 0%, #ecd08a 30%, #fff6d8 45%, #ecd08a 60%, #a8832f 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: cbe-era-in 4.2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards, cbe-sheen 2.4s 0.9s ease-in-out 1;
+}
+.cbe-banner-1933 .cbe-b-text { filter: drop-shadow(0 4px 0 #3b2c10) drop-shadow(0 0 24px rgba(236, 208, 138, 0.35)); }
+.cbe-banner-1933 .cbe-b-sub { font-family: Georgia, "Times New Roman", serif; font-style: italic; color: #e8d9b0; }
+
+.cbe-banner-modern .cbe-b-kicker { font-family: "CBE Rajdhani", "Arial Narrow", sans-serif; font-weight: 600; color: #8fe0ff; }
+.cbe-banner-modern .cbe-b-era {
+  font-family: "CBE Rajdhani", "Arial Narrow", sans-serif;
+  font-weight: 700;
+  color: #e9f8ff;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 18px rgba(120, 220, 255, 0.65), 0 0 2px #ffffff;
+  animation: cbe-era-in 4.2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards, cbe-glitch 0.5s 0.55s steps(2, end) 1;
+}
+.cbe-banner-modern .cbe-b-sub { font-family: "CBE Rajdhani", "Arial Narrow", sans-serif; font-weight: 600; color: #b8d6e6; text-transform: uppercase; letter-spacing: 0.3em; font-size: 18px; }
+
+/* ---------- Chronologie ---------- */
+@keyframes cbe-veil {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes cbe-flash {
+  0% { opacity: 0; }
+  18% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+@keyframes cbe-band {
+  0% { transform: scaleY(0); }
+  4% { transform: scaleY(0.02); }
+  16% { transform: scaleY(1); }
+  80% { transform: scaleY(1); opacity: 1; }
+  92% { transform: scaleY(0.02); opacity: 1; }
+  100% { transform: scaleY(0); opacity: 0; }
+}
+@keyframes cbe-line {
+  0% { transform: scaleX(0); }
+  6% { transform: scaleX(0); }
+  24% { transform: scaleX(1); }
+  78% { transform: scaleX(1); opacity: 1; }
+  88% { transform: scaleX(1); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes cbe-deco-in {
+  0%, 10% { opacity: 0; }
+  28% { opacity: 1; }
+  78% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+@keyframes cbe-fade-mid {
+  0%, 18% { opacity: 0; }
+  30% { opacity: 1; }
+  78% { opacity: 1; }
+  88%, 100% { opacity: 0; }
+}
+@keyframes cbe-era-in {
+  0%, 10% { opacity: 0; letter-spacing: 0.7em; filter: blur(14px); transform: scale(1.12); }
+  30% { opacity: 1; letter-spacing: 0.06em; filter: blur(0); transform: scale(1); }
+  76% { opacity: 1; transform: scale(1.03); }
+  88%, 100% { opacity: 0; transform: scale(1.06); }
+}
+@keyframes cbe-rise {
+  0%, 18% { opacity: 0; transform: translateY(10px); }
+  32% { opacity: 1; transform: translateY(0); }
+  76% { opacity: 1; }
+  86%, 100% { opacity: 0; }
+}
+@keyframes cbe-rise-late {
+  0%, 26% { opacity: 0; transform: translateY(-8px); }
+  40% { opacity: 1; transform: translateY(0); }
+  76% { opacity: 1; }
+  86%, 100% { opacity: 0; }
+}
+@keyframes cbe-spin { to { transform: rotate(360deg); } }
+@keyframes cbe-sheen {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
+@keyframes cbe-sweep {
+  0% { background-position: -60% 0, 0 0; }
+  100% { background-position: 160% 0, 0 0; }
+}
+@keyframes cbe-glitch {
+  0% { clip-path: inset(0 0 55% 0); transform: translateX(-6px); }
+  25% { clip-path: inset(40% 0 20% 0); transform: translateX(5px); }
+  50% { clip-path: inset(70% 0 0 0); transform: translateX(-3px); }
+  75% { clip-path: inset(10% 0 60% 0); transform: translateX(4px); }
+  100% { clip-path: inset(0 0 0 0); transform: none; }
+}
+
+/* Écrans étroits */
+@media (max-width: 900px) {
+  .cbe-b-band { height: 220px; }
+  .cbe-b-era { font-size: 84px; }
+  .cbe-b-corner { display: none; }
+}
+
+/* Animations réduites */
+@media (prefers-reduced-motion: reduce) {
+  .cbe-b-deco, .cbe-b-flash { display: none; }
+  .cbe-b-band, .cbe-b-line { animation: cbe-veil 4.2s ease forwards; transform: none; }
+  .cbe-b-era, .cbe-b-kicker, .cbe-b-sub { animation: cbe-veil 4.2s ease forwards !important; filter: none; letter-spacing: normal; }
+}
