@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/banner.png" alt="coc7-bascule-epoque" width="100%"></p>
+
 # CoC7 – Bascule d'époque
 
 Pour les campagnes à deux époques (1933 / 2025-2026) sur Foundry VTT v13/v14 avec L'Appel de Cthulhu 7e.
