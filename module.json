@@ -61,5 +61,11 @@
   "bugs": "https://github.com/magisterphamtom/coc7-bascule-epoque/issues",
   "readme": "https://github.com/magisterphamtom/coc7-bascule-epoque/blob/main/README.md",
   "license": "https://github.com/magisterphamtom/coc7-bascule-epoque/blob/main/LICENSE",
-  "socket": true
+  "socket": true,
+  "media": [
+    {
+      "type": "cover",
+      "url": "https://raw.githubusercontent.com/magisterphamtom/coc7-bascule-epoque/main/.github/banner.png"
+    }
+  ]
 }
