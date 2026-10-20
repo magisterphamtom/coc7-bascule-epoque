@@ -6,6 +6,10 @@
 - Dossiers rattachés par flag `coc7-bascule-epoque.era` (clic droit), étiquette 1933/2026 dans la barre latérale.
 - ConfigApp (formulaire) : nom, sous-titre, scène, playlist, thème du chat, annonce.
 
+## Fait (v1.2.0)
+- Personnages par époque : réglage monde `characters` ({userId: {1933, modern}}), CharactersApp (tableau joueur × époque), `applyCharacters(era)` appelé par switchEra (coche `syncCharacters`), bouton « Appliquer maintenant ».
+- Testé par simulation de la logique ; pas encore dans Foundry.
+
 ## À tester (Foundry 14.368, CoC7 8.16)
 - Bascule aller-retour, notifications sans erreur ; suivis ouverts qui se mettent à jour.
 - Thème du chat + HUD ; scène et playlist ; dossiers journaux et acteurs (« tous les onglets » activé dans dossiers-caches).

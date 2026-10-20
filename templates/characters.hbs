@@ -1,0 +1,30 @@
+<div class="cbe-config-form cbe-characters">
+  <p class="hint">Pour chaque joueur, choisis son personnage dans chaque époque. À chaque bascule, le personnage assigné du joueur change automatiquement. Un joueur laissé sur « Aucun » pour les deux époques n'est pas touché.</p>
+  <table class="cbe-char-table">
+    <thead>
+      <tr>
+        <th>Joueur</th>
+        {{#each eraLabels as |e|}}<th>{{e.label}}</th>{{/each}}
+        <th>Actuel</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each players as |p|}}
+      <tr>
+        <td><strong>{{p.name}}</strong></td>
+        {{#each p.eras as |e|}}
+        <td><select name="p.{{p.id}}.{{e.key}}">
+          {{#each e.options as |o|}}<option value="{{o.id}}" {{#if o.selected}}selected{{/if}}>{{o.name}}</option>{{/each}}
+        </select></td>
+        {{/each}}
+        <td>{{p.current}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div class="form-group"><label>Changer à chaque bascule</label><div class="form-fields"><input type="checkbox" name="sync" {{#if sync}}checked{{/if}}></div></div>
+  <footer class="form-footer">
+    <button type="button" data-action="apply"><i class="fa-solid fa-rotate"></i> Appliquer maintenant</button>
+    <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
+  </footer>
+</div>

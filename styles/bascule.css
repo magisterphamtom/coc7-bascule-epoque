@@ -127,3 +127,10 @@
 .chat-message .cbe-announce-era { font-family: "C7CC Limelight", "C7FT Limelight", "TAH20 Limelight", "Limelight", Georgia, serif; font-size: 30px; color: #ecd27a; line-height: 1.1; }
 .chat-message .cbe-announce.cbe-modern .cbe-announce-era { font-family: "M26 Rajdhani", "C7FT Rajdhani", "TAH20 Rajdhani", "Rajdhani", sans-serif; font-weight: 700; color: #8fe0d6; }
 .chat-message .cbe-announce-sub { font-size: 12px; font-style: italic; color: #d8ccae; }
+
+/* Personnages par époque */
+.cbe-char-table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; }
+.cbe-char-table th { text-align: left; padding: 4px 6px; letter-spacing: 0.05em; border-bottom: 1px solid #c9a227; }
+.cbe-char-table td { padding: 4px 6px; vertical-align: middle; }
+.cbe-char-table select { width: 100%; }
+.cbe-characters .form-footer { display: flex; gap: 8px; }

@@ -6,6 +6,8 @@
  * Foundry VTT v13 / v14 — magisterphamtom — MIT
  */
 
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
 const ID = "coc7-bascule-epoque";
 const ERAS = ["1933", "modern"];
 const DEFAULT_LABELS = { "1933": "1933", modern: "2025-2026" };
@@ -53,6 +55,21 @@ Hooks.once("init", () => {
     scope: "world", config: false, type: String, default: "",
     onChange: () => { refreshDirectories(); BasculeApp.instance?.render(); }
   });
+  // Personnage de chaque joueur par époque : { userId: { "1933": actorId, modern: actorId } }
+  game.settings.register(ID, "characters", { scope: "world", config: false, type: Object, default: {} });
+  game.settings.register(ID, "syncCharacters", {
+    name: "Changer le personnage des joueurs à la bascule",
+    hint: "À chaque bascule, le personnage assigné de chaque joueur devient celui de l'époque choisie (voir « Personnages par époque »).",
+    scope: "world", config: true, type: Boolean, default: true
+  });
+  game.settings.registerMenu(ID, "charactersMenu", {
+    name: "Personnages par époque",
+    label: "Choisir les personnages",
+    hint: "Pour chaque joueur, son personnage de 1933 et celui de 2025-2026.",
+    icon: "fa-solid fa-user-group",
+    type: CharactersApp,
+    restricted: true
+  });
   game.settings.register(ID, "showBanner", {
     name: "Afficher le bandeau de changement d'époque",
     hint: "Grand bandeau animé qui traverse l'écran quand le Gardien change d'époque.",
@@ -91,6 +108,15 @@ async function switchEra(era, { silent = false } = {}) {
 
   // 1. Époque courante (sert aux autres modules et à l'affichage)
   await step("époque enregistrée", () => game.settings.set(ID, "currentEra", era));
+
+  // 1b. Personnage assigné de chaque joueur
+  if (game.settings.get(ID, "syncCharacters")) {
+    await step("personnages", async () => {
+      const res = await applyCharacters(era);
+      if (res.missing.length) ui.notifications.warn(`Pas de personnage ${getConfig()[era].label || DEFAULT_LABELS[era]} pour : ${res.missing.join(", ")}.`);
+      return res.changed > 0 || res.unchanged > 0;
+    });
+  }
 
   // 2. Suivis Chance / Santé Mentale / Bonds : n'afficher que cette époque
   await step("suivis", async () => {
@@ -154,6 +180,104 @@ async function switchEra(era, { silent = false } = {}) {
 }
 
 /* ================================================================== */
+/*  Personnages par époque                                             */
+/* ================================================================== */
+
+/**
+ * Assigne à chaque joueur son personnage de l'époque.
+ * Un joueur sans personnage choisi pour cette époque n'est pas touché (il est signalé).
+ */
+async function applyCharacters(era) {
+  const map = game.settings.get(ID, "characters") ?? {};
+  const res = { changed: 0, unchanged: 0, missing: [] };
+  for (const user of game.users) {
+    if (user.isGM) continue;
+    const entry = map[user.id];
+    if (!entry || !Object.values(entry).some(Boolean)) continue; // joueur non configuré : on ignore
+    const actor = entry[era] ? game.actors.get(entry[era]) : null;
+    if (!actor) { res.missing.push(user.name); continue; }
+    if (user.character?.id === actor.id) { res.unchanged++; continue; }
+    await user.update({ character: actor.id });
+    res.changed++;
+  }
+  return res;
+}
+
+class CharactersApp extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "coc7-bascule-epoque-characters",
+    tag: "form",
+    window: { title: "Personnages par époque", icon: "fa-solid fa-user-group" },
+    position: { width: 640, height: "auto" },
+    form: { handler: CharactersApp.#onSubmit, closeOnSubmit: true },
+    actions: { apply: CharactersApp.#onApply }
+  };
+
+  static PARTS = { main: { template: `modules/${ID}/templates/characters.hbs` } };
+
+  async _prepareContext() {
+    const cfg = getConfig();
+    const map = game.settings.get(ID, "characters") ?? {};
+    const level = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+    const players = [...game.users].filter((u) => !u.isGM).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    const opts = (user, selected) => {
+      const owned = game.actors.filter((a) => a.type === "character" && a.testUserPermission(user, level));
+      // si le joueur est déjà lié à une fiche qu'il ne possède pas, on la garde dans la liste
+      const sel = selected ? game.actors.get(selected) : null;
+      if (sel && !owned.includes(sel)) owned.push(sel);
+      owned.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+      return [{ id: "", name: "— Aucun —", selected: !selected }]
+        .concat(owned.map((a) => ({ id: a.id, name: a.name, selected: a.id === selected })));
+    };
+    return {
+      eraLabels: ERAS.map((era) => ({ key: era, label: cfg[era].label || DEFAULT_LABELS[era] })),
+      players: players.map((u) => ({
+        id: u.id,
+        name: u.name,
+        current: u.character?.name ?? "—",
+        eras: ERAS.map((era) => ({ key: era, options: opts(u, map[u.id]?.[era]) }))
+      })),
+      sync: game.settings.get(ID, "syncCharacters"),
+      currentEra: currentEra()
+    };
+  }
+
+  static async #onSubmit(event, form, formData) {
+    const data = foundry.utils.expandObject(formData.object);
+    const map = {};
+    for (const [uid, e] of Object.entries(data.p ?? {})) {
+      const entry = {};
+      for (const era of ERAS) if (e?.[era]) entry[era] = e[era];
+      if (Object.keys(entry).length) map[uid] = entry;
+    }
+    await game.settings.set(ID, "characters", map);
+    await game.settings.set(ID, "syncCharacters", !!data.sync);
+    ui.notifications.info("Personnages par époque enregistrés.");
+  }
+
+  /** Applique tout de suite l'époque en cours, avec les valeurs saisies (sans fermer la fenêtre) */
+  static async #onApply() {
+    const form = this.element;
+    const fd = new foundry.applications.ux.FormDataExtended(form);
+    const data = foundry.utils.expandObject(fd.object);
+    const map = {};
+    for (const [uid, e] of Object.entries(data.p ?? {})) {
+      const entry = {};
+      for (const era of ERAS) if (e?.[era]) entry[era] = e[era];
+      if (Object.keys(entry).length) map[uid] = entry;
+    }
+    await game.settings.set(ID, "characters", map);
+    const era = currentEra();
+    if (!era) return ui.notifications.warn("Aucune époque en cours : fais d'abord une bascule.");
+    const res = await applyCharacters(era);
+    const label = getConfig()[era].label || DEFAULT_LABELS[era];
+    if (res.missing.length) ui.notifications.warn(`Pas de personnage ${label} pour : ${res.missing.join(", ")}.`);
+    ui.notifications.info(`Personnages ${label} appliqués (${res.changed} changé${res.changed > 1 ? "s" : ""}).`);
+    this.render();
+  }
+}
+
+/* ================================================================== */
 /*  Bandeau animé                                                      */
 /* ================================================================== */
 
@@ -199,8 +323,6 @@ Hooks.once("ready", () => {
 /*  Fenêtre de bascule                                                 */
 /* ================================================================== */
 
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
-
 class BasculeApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static instance = null;
 
@@ -211,7 +333,8 @@ class BasculeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 460, height: "auto" },
     actions: {
       switch: BasculeApp.#onSwitch,
-      configure: BasculeApp.#onConfigure
+      configure: BasculeApp.#onConfigure,
+      characters: BasculeApp.#onCharacters
     }
   };
 
@@ -242,6 +365,10 @@ class BasculeApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static #onConfigure() {
     new ConfigApp().render({ force: true });
+  }
+
+  static #onCharacters() {
+    new CharactersApp().render({ force: true });
   }
 
   static toggle() {
