@@ -30,5 +30,13 @@ Les fiches thématiques changent toutes seules : elles suivent déjà l'époque 
 ## Macro
 `game.modules.get("coc7-bascule-epoque").api.switchEra("1933")` ou `("modern")`.
 
+## Aperçus
+
+<p align="center"><img src=".github/previews/apercu-bascule-epoque.png" alt="Personnage de chaque joueur selon l'époque" width="85%"></p>
+
+<p align="center"><img src=".github/previews/bandeau-1933.png" alt="Bandeau 1933" width="85%"></p>
+
+<p align="center"><img src=".github/previews/bandeau-2026.png" alt="Bandeau 2026" width="85%"></p>
+
 ## Installation
 Manifeste : `https://github.com/magisterphamtom/coc7-bascule-epoque/releases/latest/download/module.json`
