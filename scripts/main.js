@@ -120,6 +120,8 @@ async function switchEra(era, { silent = false } = {}) {
 
   // 2. Suivis Chance / Santé Mentale / Bonds : n'afficher que cette époque
   await step("suivis", async () => {
+    // Suivi du groupe (les quatre suivis réunis) : filtre commun rangé chez coc7-luck-tracker
+    if (active("coc7-suivi-groupe")) return game.user.update({ "flags.coc7-luck-tracker.eraFilter": era });
     const scopes = active("coc7-luck-tracker")
       ? ["coc7-luck-tracker"]
       : ["coc7-san-tracker", "coc7-bonds-tracker"].filter(active);
