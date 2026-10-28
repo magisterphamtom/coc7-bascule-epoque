@@ -299,7 +299,7 @@ class BasculeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 660, height: "auto" },
     form: { handler: BasculeApp.#onSubmit, closeOnSubmit: false, submitOnChange: false },
     actions: {
-      tab: BasculeApp.#onTab,
+      cbeOnglet: BasculeApp.#onTab, // « tab » est une action réservée de Foundry
       switch: BasculeApp.#onSwitch,
       apply: BasculeApp.#onApply,
       preview: BasculeApp.#onPreview
