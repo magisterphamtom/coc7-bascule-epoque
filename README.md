@@ -3,7 +3,7 @@
 # CoC7 – Bascule d'époque
 
 Pour les campagnes à deux époques (1933 / 2025-2026) sur Foundry VTT v13/v14 avec L'Appel de Cthulhu 7e.
-Un bouton **sablier** dans les contrôles de jetons (Gardien) ouvre la fenêtre de bascule : un clic sur **1933** ou **2025-2026** et toute la table change d'époque.
+Un bouton **sablier** dans les contrôles de jetons (Gardien) ouvre la fenêtre de bascule, avec trois onglets : **Les époques**, **Personnages** et **Réglages**. Un clic sur **1933** ou **2025-2026** et toute la table change d'époque.
 
 ## Ce que fait la bascule
 - **Suivis Chance / Santé Mentale / Bonds** : n'affichent plus que l'époque choisie.
@@ -18,12 +18,12 @@ Un bouton **sablier** dans les contrôles de jetons (Gardien) ouvre la fenêtre 
 Les fiches thématiques changent toutes seules : elles suivent déjà l'époque de chaque investigateur.
 
 ## Réglages
-- Fenêtre de bascule → **Réglages des époques…** (ou Paramètres → Bascule d'époque → Configurer) : nom, sous-titre, scène, playlist, thème du chat, annonce, pour chaque époque.
+- Onglet **Réglages** (ou Paramètres → Bascule d'époque → Configurer) : nom, sous-titre, scène, playlist, thème du chat, annonce, pour chaque époque.
 - **Rattacher un dossier à une époque** : clic droit sur le dossier → *Époque : 1933*, *Époque : 2025-2026* ou *Époque : les deux*. Une petite étiquette apparaît à côté du nom (visible du Gardien seulement).
 - Pour masquer aussi les dossiers d'**acteurs**, activer « tous les onglets » dans les réglages de *Masquer les dossiers de journaux*.
 
 ## Personnages par époque
-- Fenêtre de bascule → **Personnages par époque…** (ou Paramètres → Bascule d'époque → Choisir les personnages) : une ligne par joueur, avec son personnage 1933 et son personnage 2025-2026 (seules les fiches dont il est propriétaire sont proposées).
+- Onglet **Personnages** (ou Paramètres → Bascule d'époque → Choisir les personnages) : une ligne par joueur, avec son personnage 1933 et son personnage 2025-2026 (seules les fiches dont il est propriétaire sont proposées).
 - Coche **Changer à chaque bascule** pour activer ou couper le changement automatique ; bouton **Appliquer maintenant** pour resynchroniser l'époque en cours.
 - Un joueur sans personnage pour l'époque choisie n'est pas modifié ; le Gardien en est averti. Un joueur laissé sur « Aucun » pour les deux époques est ignoré.
 

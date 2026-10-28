@@ -67,7 +67,7 @@ Hooks.once("init", () => {
     label: "Choisir les personnages",
     hint: "Pour chaque joueur, son personnage de 1933 et celui de 2025-2026.",
     icon: "fa-solid fa-user-group",
-    type: CharactersApp,
+    type: class { render() { BasculeApp.open("personnages"); } },
     restricted: true
   });
   game.settings.register(ID, "showBanner", {
@@ -80,7 +80,7 @@ Hooks.once("init", () => {
     label: "Configurer",
     hint: "Scène, musique, thème du chat et annonce pour chaque époque.",
     icon: "fa-solid fa-hourglass-half",
-    type: ConfigApp,
+    type: class { render() { BasculeApp.open("reglages"); } },
     restricted: true
   });
 });
@@ -203,80 +203,6 @@ async function applyCharacters(era) {
   return res;
 }
 
-class CharactersApp extends HandlebarsApplicationMixin(ApplicationV2) {
-  static DEFAULT_OPTIONS = {
-    id: "coc7-bascule-epoque-characters",
-    tag: "form",
-    window: { title: "Personnages par époque", icon: "fa-solid fa-user-group" },
-    position: { width: 640, height: "auto" },
-    form: { handler: CharactersApp.#onSubmit, closeOnSubmit: true },
-    actions: { apply: CharactersApp.#onApply }
-  };
-
-  static PARTS = { main: { template: `modules/${ID}/templates/characters.hbs` } };
-
-  async _prepareContext() {
-    const cfg = getConfig();
-    const map = game.settings.get(ID, "characters") ?? {};
-    const level = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
-    const players = [...game.users].filter((u) => !u.isGM).sort((a, b) => a.name.localeCompare(b.name, "fr"));
-    const opts = (user, selected) => {
-      const owned = game.actors.filter((a) => a.type === "character" && a.testUserPermission(user, level));
-      // si le joueur est déjà lié à une fiche qu'il ne possède pas, on la garde dans la liste
-      const sel = selected ? game.actors.get(selected) : null;
-      if (sel && !owned.includes(sel)) owned.push(sel);
-      owned.sort((a, b) => a.name.localeCompare(b.name, "fr"));
-      return [{ id: "", name: "— Aucun —", selected: !selected }]
-        .concat(owned.map((a) => ({ id: a.id, name: a.name, selected: a.id === selected })));
-    };
-    return {
-      eraLabels: ERAS.map((era) => ({ key: era, label: cfg[era].label || DEFAULT_LABELS[era] })),
-      players: players.map((u) => ({
-        id: u.id,
-        name: u.name,
-        current: u.character?.name ?? "—",
-        eras: ERAS.map((era) => ({ key: era, options: opts(u, map[u.id]?.[era]) }))
-      })),
-      sync: game.settings.get(ID, "syncCharacters"),
-      currentEra: currentEra()
-    };
-  }
-
-  static async #onSubmit(event, form, formData) {
-    const data = foundry.utils.expandObject(formData.object);
-    const map = {};
-    for (const [uid, e] of Object.entries(data.p ?? {})) {
-      const entry = {};
-      for (const era of ERAS) if (e?.[era]) entry[era] = e[era];
-      if (Object.keys(entry).length) map[uid] = entry;
-    }
-    await game.settings.set(ID, "characters", map);
-    await game.settings.set(ID, "syncCharacters", !!data.sync);
-    ui.notifications.info("Personnages par époque enregistrés.");
-  }
-
-  /** Applique tout de suite l'époque en cours, avec les valeurs saisies (sans fermer la fenêtre) */
-  static async #onApply() {
-    const form = this.element;
-    const fd = new foundry.applications.ux.FormDataExtended(form);
-    const data = foundry.utils.expandObject(fd.object);
-    const map = {};
-    for (const [uid, e] of Object.entries(data.p ?? {})) {
-      const entry = {};
-      for (const era of ERAS) if (e?.[era]) entry[era] = e[era];
-      if (Object.keys(entry).length) map[uid] = entry;
-    }
-    await game.settings.set(ID, "characters", map);
-    const era = currentEra();
-    if (!era) return ui.notifications.warn("Aucune époque en cours : fais d'abord une bascule.");
-    const res = await applyCharacters(era);
-    const label = getConfig()[era].label || DEFAULT_LABELS[era];
-    if (res.missing.length) ui.notifications.warn(`Pas de personnage ${label} pour : ${res.missing.join(", ")}.`);
-    ui.notifications.info(`Personnages ${label} appliqués (${res.changed} changé${res.changed > 1 ? "s" : ""}).`);
-    this.render();
-  }
-}
-
 /* ================================================================== */
 /*  Bandeau animé                                                      */
 /* ================================================================== */
@@ -323,95 +249,122 @@ Hooks.once("ready", () => {
 /*  Fenêtre de bascule                                                 */
 /* ================================================================== */
 
+const ONGLETS = [
+  { id: "epoques", label: "Les époques", icon: "fa-solid fa-hourglass-half" },
+  { id: "personnages", label: "Personnages", icon: "fa-solid fa-user-group" },
+  { id: "reglages", label: "Réglages", icon: "fa-solid fa-gears" }
+];
+
+/** Personnages saisis dans le formulaire : { userId: { "1933": actorId, modern: actorId } } */
+function charactersFromForm(data) {
+  const map = {};
+  for (const [uid, e] of Object.entries(data.p ?? {})) {
+    const entry = {};
+    for (const era of ERAS) if (e?.[era]) entry[era] = e[era];
+    if (Object.keys(entry).length) map[uid] = entry;
+  }
+  return map;
+}
+
+/** Réglages des époques saisis dans le formulaire */
+function configFromForm(data) {
+  const cfg = {};
+  for (const era of ERAS) {
+    const d = data[era] ?? {};
+    cfg[era] = {
+      label: String(d.label ?? "").trim() || DEFAULT_LABELS[era],
+      sub: String(d.sub ?? "").trim(),
+      scene: d.scene ?? "",
+      playlist: d.playlist ?? "",
+      chatTheme: d.chatTheme ?? "",
+      announce: !!d.announce,
+      banner: !!d.banner
+    };
+  }
+  return cfg;
+}
+
+/**
+ * Une seule fenêtre à trois onglets : Les époques (la bascule), Personnages (par joueur et par époque)
+ * et Réglages (scène, musique, thème du chat, annonce, bandeau). Changer d'onglet ne perd pas la saisie.
+ */
 class BasculeApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static instance = null;
 
   static DEFAULT_OPTIONS = {
     id: "coc7-bascule-epoque-app",
-    tag: "div",
-    window: { title: "Bascule d'époque", icon: "fa-solid fa-hourglass-half" },
-    position: { width: 460, height: "auto" },
+    tag: "form",
+    classes: ["cbe-window"],
+    window: { title: "Bascule d'époque", icon: "fa-solid fa-hourglass-half", resizable: true },
+    position: { width: 660, height: "auto" },
+    form: { handler: BasculeApp.#onSubmit, closeOnSubmit: false, submitOnChange: false },
     actions: {
+      tab: BasculeApp.#onTab,
       switch: BasculeApp.#onSwitch,
-      configure: BasculeApp.#onConfigure,
-      characters: BasculeApp.#onCharacters
+      apply: BasculeApp.#onApply,
+      preview: BasculeApp.#onPreview
     }
   };
 
-  static PARTS = { main: { template: `modules/${ID}/templates/bascule.hbs` } };
+  static PARTS = {
+    nav: { template: `modules/${ID}/templates/onglets.hbs` },
+    epoques: { template: `modules/${ID}/templates/bascule.hbs` },
+    personnages: { template: `modules/${ID}/templates/characters.hbs` },
+    reglages: { template: `modules/${ID}/templates/config.hbs` },
+    pied: { template: `modules/${ID}/templates/pied.hbs` }
+  };
+
+  tab = "epoques";
 
   async _prepareContext() {
     const cfg = getConfig();
     const cur = currentEra();
+    const map = game.settings.get(ID, "characters") ?? {};
+    const level = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+    const players = [...game.users].filter((u) => !u.isGM).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    const charOpts = (user, selected) => {
+      const owned = game.actors.filter((a) => a.type === "character" && a.testUserPermission(user, level));
+      // si le joueur est déjà lié à une fiche qu'il ne possède pas, on la garde dans la liste
+      const sel = selected ? game.actors.get(selected) : null;
+      if (sel && !owned.includes(sel)) owned.push(sel);
+      owned.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+      return [{ id: "", name: "— Aucun —", selected: !selected }]
+        .concat(owned.map((a) => ({ id: a.id, name: a.name, selected: a.id === selected })));
+    };
+    const opt = (items, selected) => [{ id: "", name: "— Ne pas changer —", selected: !selected }]
+      .concat(items.map((d) => ({ id: d.id, name: d.name, selected: d.id === selected })));
+    const scenes = [...game.scenes].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    const playlists = [...game.playlists].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    const label = (era) => cfg[era].label || DEFAULT_LABELS[era];
+
     return {
+      onglets: ONGLETS.map((o) => ({ ...o, actif: o.id === this.tab })),
+      // Les époques
       eras: ERAS.map((era) => ({
         key: era,
-        label: cfg[era].label || DEFAULT_LABELS[era],
+        label: label(era),
         sub: cfg[era].sub,
         current: era === cur,
         scene: game.scenes.get(cfg[era].scene)?.name ?? "",
         playlist: game.playlists.get(cfg[era].playlist)?.name ?? "",
         chatTheme: cfg[era].chatTheme ? CHAT_THEMES[cfg[era].chatTheme] : "",
-        folders: game.folders.filter((f) => f.getFlag(ID, "era") === era).length
+        folders: game.folders.filter((f) => f.getFlag(ID, "era") === era).length,
+        players: players.filter((u) => map[u.id]?.[era]).length
       })),
-      hasDossiers: active("dossiers-caches")
-    };
-  }
-
-  static async #onSwitch(event, target) {
-    target.disabled = true;
-    await switchEra(target.dataset.era);
-  }
-
-  static #onConfigure() {
-    new ConfigApp().render({ force: true });
-  }
-
-  static #onCharacters() {
-    new CharactersApp().render({ force: true });
-  }
-
-  static toggle() {
-    if (this.instance?.rendered) return this.instance.close();
-    this.instance = new BasculeApp();
-    this.instance.render({ force: true });
-  }
-}
-
-/* ================================================================== */
-/*  Fenêtre de réglages                                                */
-/* ================================================================== */
-
-class ConfigApp extends HandlebarsApplicationMixin(ApplicationV2) {
-  static DEFAULT_OPTIONS = {
-    id: "coc7-bascule-epoque-config",
-    tag: "form",
-    window: { title: "Réglages des époques", icon: "fa-solid fa-gears" },
-    position: { width: 620, height: "auto" },
-    form: { handler: ConfigApp.#onSubmit, closeOnSubmit: true },
-    actions: { preview: ConfigApp.#onPreview }
-  };
-
-  /** Aperçu du bandeau, chez le Gardien seulement, avec les valeurs en cours de saisie */
-  static #onPreview(event, target) {
-    const era = target.dataset.era;
-    const form = this.element;
-    const label = form.querySelector(`[name="${era}.label"]`)?.value?.trim() || DEFAULT_LABELS[era];
-    const sub = form.querySelector(`[name="${era}.sub"]`)?.value?.trim() ?? "";
-    showBanner({ era, label, sub }, { force: true });
-  }
-
-  static PARTS = { main: { template: `modules/${ID}/templates/config.hbs` } };
-
-  async _prepareContext() {
-    const cfg = getConfig();
-    const opt = (items, selected) => [{ id: "", name: "— Ne pas changer —", selected: !selected }]
-      .concat(items.map((d) => ({ id: d.id, name: d.name, selected: d.id === selected })));
-    const scenes = [...game.scenes].sort((a, b) => a.name.localeCompare(b.name, "fr"));
-    const playlists = [...game.playlists].sort((a, b) => a.name.localeCompare(b.name, "fr"));
-    return {
+      hasDossiers: active("dossiers-caches"),
+      // Personnages
+      eraLabels: ERAS.map((era) => ({ key: era, label: label(era) })),
+      players: players.map((u) => ({
+        id: u.id,
+        name: u.name,
+        current: u.character?.name ?? "—",
+        eras: ERAS.map((era) => ({ key: era, options: charOpts(u, map[u.id]?.[era]) }))
+      })),
+      sync: game.settings.get(ID, "syncCharacters"),
+      currentEra: cur,
+      // Réglages
       chatActive: active("coc7-cartes-chat"),
-      eras: ERAS.map((era) => ({
+      cfgEras: ERAS.map((era) => ({
         key: era,
         title: era === "1933" ? "Époque 1933" : "Époque 2025-2026",
         ...cfg[era],
@@ -422,24 +375,73 @@ class ConfigApp extends HandlebarsApplicationMixin(ApplicationV2) {
     };
   }
 
+  _onRender(context, options) {
+    super._onRender(context, options);
+    this.#showTab();
+  }
+
+  /** N'affiche que l'onglet choisi ; les autres restent dans le formulaire (la saisie est conservée). */
+  #showTab() {
+    const el = this.element;
+    for (const o of ONGLETS) el.querySelector(`[data-application-part="${o.id}"]`)?.classList.toggle("cbe-cache", o.id !== this.tab);
+    el.querySelectorAll(".cbe-onglets a").forEach((a) => a.classList.toggle("actif", a.dataset.tab === this.tab));
+    el.querySelector('[data-application-part="pied"]')?.classList.toggle("cbe-cache", this.tab === "epoques");
+    this.setPosition({ height: "auto" });
+  }
+
+  static #onTab(event, target) {
+    this.tab = target.dataset.tab;
+    this.#showTab();
+  }
+
+  static async #onSwitch(event, target) {
+    target.disabled = true;
+    await switchEra(target.dataset.era);
+  }
+
+  /** Enregistrer : les personnages et les réglages en une fois. */
   static async #onSubmit(event, form, formData) {
     const data = foundry.utils.expandObject(formData.object);
-    const cfg = {};
-    for (const era of ERAS) {
-      const d = data[era] ?? {};
-      cfg[era] = {
-        label: String(d.label ?? "").trim() || DEFAULT_LABELS[era],
-        sub: String(d.sub ?? "").trim(),
-        scene: d.scene ?? "",
-        playlist: d.playlist ?? "",
-        chatTheme: d.chatTheme ?? "",
-        announce: !!d.announce,
-        banner: !!d.banner
-      };
-    }
-    await game.settings.set(ID, "config", cfg);
-    ui.notifications.info("Réglages des époques enregistrés.");
-    BasculeApp.instance?.render();
+    await game.settings.set(ID, "characters", charactersFromForm(data));
+    await game.settings.set(ID, "syncCharacters", !!data.sync);
+    await game.settings.set(ID, "config", configFromForm(data));
+    ui.notifications.info("Bascule d'époque : personnages et réglages enregistrés.");
+    this.render();
+  }
+
+  /** Applique tout de suite l'époque en cours, avec les personnages saisis */
+  static async #onApply() {
+    const fd = new foundry.applications.ux.FormDataExtended(this.element);
+    const data = foundry.utils.expandObject(fd.object);
+    await game.settings.set(ID, "characters", charactersFromForm(data));
+    const era = currentEra();
+    if (!era) return ui.notifications.warn("Aucune époque en cours : fais d'abord une bascule.");
+    const res = await applyCharacters(era);
+    const label = getConfig()[era].label || DEFAULT_LABELS[era];
+    if (res.missing.length) ui.notifications.warn(`Pas de personnage ${label} pour : ${res.missing.join(", ")}.`);
+    ui.notifications.info(`Personnages ${label} appliqués (${res.changed} changé${res.changed > 1 ? "s" : ""}).`);
+    this.render();
+  }
+
+  /** Aperçu du bandeau, chez le Gardien seulement, avec les valeurs en cours de saisie */
+  static #onPreview(event, target) {
+    const era = target.dataset.era;
+    const form = this.element;
+    const label = form.querySelector(`[name="${era}.label"]`)?.value?.trim() || DEFAULT_LABELS[era];
+    const sub = form.querySelector(`[name="${era}.sub"]`)?.value?.trim() ?? "";
+    showBanner({ era, label, sub }, { force: true });
+  }
+
+  static open(tab = "epoques") {
+    this.instance ??= new BasculeApp();
+    this.instance.tab = tab;
+    if (this.instance.rendered) { this.instance.#showTab(); this.instance.bringToFront?.(); return this.instance; }
+    return this.instance.render({ force: true });
+  }
+
+  static toggle() {
+    if (this.instance?.rendered) return this.instance.close();
+    return this.open("epoques");
   }
 }
 
@@ -548,5 +550,5 @@ Hooks.on("updateFolder", (folder, changes) => { if (changes?.flags) refreshDirec
 
 Hooks.once("ready", () => {
   const mod = game.modules.get(ID);
-  if (mod) mod.api = { switchEra, currentEra, open: () => BasculeApp.toggle(), showBanner };
+  if (mod) mod.api = { switchEra, currentEra, open: (tab) => BasculeApp.open(tab), toggle: () => BasculeApp.toggle(), showBanner };
 });

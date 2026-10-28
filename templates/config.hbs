@@ -1,5 +1,5 @@
 <div class="cbe-config-form">
-  {{#each eras as |e|}}
+  {{#each cfgEras as |e|}}
     <fieldset class="cbe-fieldset cbe-{{e.key}}">
       <legend>{{e.title}}</legend>
       <div class="form-group"><label>Nom affiché</label><div class="form-fields"><input type="text" name="{{e.key}}.label" value="{{e.label}}"></div></div>
@@ -23,5 +23,4 @@
       </div></div>
     </fieldset>
   {{/each}}
-  <footer class="form-footer"><button type="submit"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button></footer>
 </div>

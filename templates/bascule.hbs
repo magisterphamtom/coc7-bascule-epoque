@@ -8,6 +8,7 @@
         {{#if e.current}}<span class="cbe-era-badge">Époque actuelle</span>{{/if}}
         <ul class="cbe-era-list">
           <li><i class="fa-solid fa-list-check"></i> Suivis Chance, SAN, Bonds</li>
+          {{#if e.players}}<li><i class="fa-solid fa-user-group"></i> {{e.players}} personnage(s) de joueur</li>{{/if}}
           {{#if e.chatTheme}}<li><i class="fa-solid fa-palette"></i> Chat : {{e.chatTheme}}</li>{{/if}}
           {{#if e.scene}}<li><i class="fa-solid fa-map"></i> Scène : {{e.scene}}</li>{{/if}}
           {{#if e.playlist}}<li><i class="fa-solid fa-music"></i> Musique : {{e.playlist}}</li>{{/if}}
@@ -20,6 +21,4 @@
     Rattache des dossiers à une époque par <b>clic droit → Époque : …</b> dans la barre latérale :
     ceux de l'autre époque seront masqués{{#unless hasDossiers}} (nécessite le module « Masquer les dossiers de journaux »){{/unless}}.
   </p>
-  <button type="button" class="cbe-config" data-action="configure"><i class="fa-solid fa-gears"></i> Réglages des époques…</button>
-  <button type="button" class="cbe-config" data-action="characters"><i class="fa-solid fa-user-group"></i> Personnages par époque…</button>
 </section>
