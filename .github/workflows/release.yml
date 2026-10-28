@@ -22,7 +22,7 @@ jobs:
       - name: Créer module.zip
         run: |
           FILES=""
-          for f in module.json scripts styles templates fonts README.md LICENSE; do
+          for f in module.json scripts styles templates fonts icons README.md LICENSE; do
             [ -e "$f" ] && FILES="$FILES $f"
           done
           zip -r module.zip $FILES
