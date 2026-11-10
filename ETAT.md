@@ -10,6 +10,10 @@
 - Personnages par époque : réglage monde `characters` ({userId: {1933, modern}}), CharactersApp (tableau joueur × époque), `applyCharacters(era)` appelé par switchEra (coche `syncCharacters`), bouton « Appliquer maintenant ».
 - Testé par simulation de la logique ; pas encore dans Foundry.
 
+## Fait (v1.3.1)
+- Correctif : les deux menus de réglages (« Personnages par époque », « Réglages des époques ») utilisaient une classe vide comme `type` ; Foundry v14 exige un ApplicationV2, d'où l'erreur au démarrage (« You must provide a menu type… ») qui empêchait aussi d'enregistrer « showBanner ». Remplacées par `MenuPersonnages` / `MenuReglages` (ApplicationV2 qui ouvrent la fenêtre à onglets).
+- Testé par simulation du hook `init` avec la même vérification que Foundry : erreur reproduite sur la v1.3.0, absente en 1.3.1.
+
 ## À tester (Foundry 14.368, CoC7 8.16)
 - Bascule aller-retour, notifications sans erreur ; suivis ouverts qui se mettent à jour.
 - Thème du chat + HUD ; scène et playlist ; dossiers journaux et acteurs (« tous les onglets » activé dans dossiers-caches).

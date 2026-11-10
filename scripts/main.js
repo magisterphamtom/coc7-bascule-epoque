@@ -67,7 +67,7 @@ Hooks.once("init", () => {
     label: "Choisir les personnages",
     hint: "Pour chaque joueur, son personnage de 1933 et celui de 2025-2026.",
     icon: "fa-solid fa-user-group",
-    type: class { render() { BasculeApp.open("personnages"); } },
+    type: MenuPersonnages,
     restricted: true
   });
   game.settings.register(ID, "showBanner", {
@@ -80,7 +80,7 @@ Hooks.once("init", () => {
     label: "Configurer",
     hint: "Scène, musique, thème du chat et annonce pour chaque époque.",
     icon: "fa-solid fa-hourglass-half",
-    type: class { render() { BasculeApp.open("reglages"); } },
+    type: MenuReglages,
     restricted: true
   });
 });
@@ -290,6 +290,15 @@ function configFromForm(data) {
  * Une seule fenêtre à trois onglets : Les époques (la bascule), Personnages (par joueur et par époque)
  * et Réglages (scène, musique, thème du chat, annonce, bandeau). Changer d'onglet ne perd pas la saisie.
  */
+/* Foundry v14 exige que le « type » d'un menu de réglages soit une fenêtre (ApplicationV2).
+   Ces deux petites classes n'affichent rien elles-mêmes : elles ouvrent la fenêtre à onglets. */
+class MenuPersonnages extends ApplicationV2 {
+  render() { BasculeApp.open("personnages"); return this; }
+}
+class MenuReglages extends ApplicationV2 {
+  render() { BasculeApp.open("reglages"); return this; }
+}
+
 class BasculeApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static instance = null;
 
